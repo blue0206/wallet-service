@@ -1,0 +1,40 @@
+{
+  "name": "wallet-service",
+  "version": "1.0.0",
+  "description": "A high-concurrency, double-entry ledger system built with Node.js, TypeScript, and PostgreSQL. Features ACID transactions, idempotency enforcement, and deadlock avoidance.",
+  "homepage": "https://github.com/blue0206/wallet-service#readme",
+  "bugs": {
+    "url": "https://github.com/blue0206/wallet-service/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blue0206/wallet-service.git"
+  },
+  "license": "ISC",
+  "author": "Aayush Rai",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "pg": "^8.18.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.2.3",
+    "@types/pg": "^8.16.0",
+    "@types/uuid": "^10.0.0",
+    "nodemon": "^3.1.11",
+    "pino-pretty": "^13.1.3",
+    "typescript": "^5.9.3"
+  }
+}
