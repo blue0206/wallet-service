@@ -1,0 +1,36 @@
+{
+    "compilerOptions": {
+        // Basic Options 
+        "target": "ES2022",
+        "module": "NodeNext",
+        "lib": [
+            "ES2022"
+        ],
+        // Output
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "sourceMap": true,
+        // Module Resolution
+        "moduleResolution": "nodenext",
+        // Interoperability and ESM specifics
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        // Strict type-checking and additional checks
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        // Build Performance
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+    ]
+}
