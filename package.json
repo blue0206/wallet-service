@@ -18,7 +18,8 @@
     "build": "tsc",
     "dev": "node dist/index.js",
     "dev:watch": "nodemon dist/index.js",
-    "start": "npm run build && npm run dev"
+    "start": "npm run build && npm run dev",
+    "db:seed": "npm run build && node dist/core/db/seed.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
