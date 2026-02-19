@@ -6,6 +6,8 @@ const EnvironmentSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("development"),
   // server
   PORT: z.coerce.number().int().positive().default(8000),
+  // cors
+  CORS_ORIGIN: z.string().min(1, { message: "CORS origin is missing." }),
   // db
   DB_HOST: z.string().min(1, { message: "DB_HOST is missing." }),
   DB_PASSWORD: z.string().min(1, { message: "DB_PASSWORD  is missing." }),
