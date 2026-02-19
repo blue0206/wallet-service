@@ -11,6 +11,21 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - postgres_logs:/var/lib/postgresql/data/log
+    command: >
+      postgres
+      -c logging_collector=on
+      -c log_destination=stderr
+      -c log_directory=log
+      -c log_filename=postgresql-%Y-%m-%d_%H%M%S.log
+      -c log_rotation_age=1d
+      -c log_rotation_size=100MB
+      -c log_min_duration_statement=200ms
+      -c log_checkpoints=on
+      -c log_connections=on
+      -c log_disconnections=on
+      -c log_lock_waits=on
+      -c log_line_prefix='%m [%p] %u@%d %r %a '
 
   pgadmin:
     image: dpage/pgadmin4
@@ -25,3 +40,4 @@ services:
 
 volumes:
   postgres_data:
+  postgres_logs:
