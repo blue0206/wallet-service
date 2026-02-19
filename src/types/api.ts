@@ -13,3 +13,8 @@ export class ApiError extends Error {
     this.details = details;
   }
 }
+
+export interface HealthcheckPayload {
+  time: string;
+  message: string;
+}
