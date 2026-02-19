@@ -5,6 +5,12 @@ const EnvironmentSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("development"),
   // server
   PORT: z.coerce.number().int().positive().default(8000),
+  // db
+  DB_HOST: z.string().min(1, { message: "DB_HOST is missing." }),
+  DB_PASSWORD: z.string().min(1, { message: "DB_PASSWORD  is missing." }),
+  DB_USER: z.string().min(1, { message: "DB_USER is missing." }),
+  DB_NAME: z.string().min(1, { message: "DB_NAME is missing." }),
+  DB_PORT: z.coerce.number().int().positive().default(5432),
   // pino logger
   LOG_LEVEL: z
     .enum(["debug", "info", "warn", "error", "fatal"])
