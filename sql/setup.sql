@@ -43,7 +43,7 @@ CREATE TABLE wallets (
 CREATE TABLE transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id), -- The initiator of transaction
-    idempotency_key VARCHAR(255) UNIQUE NOT NULL,
+    idempotency_key UUID NOT NULL,
     type transaction_type_enum NOT NULL,
     status transaction_status_enum NOT NULL DEFAULT 'PENDING',
     metadata JSONB,
@@ -81,7 +81,9 @@ CREATE INDEX idx_ledger_wallet ON ledger(wallet_id);
 -- Revenue wallet ID (CP): e9e68167-e240-4888-b29b-44c06839f986
 -- Revenue wallet ID (C): 10ec1ea5-8408-4bf0-b696-7bc964a51e95
 -- Transaction Sign-Up Bonus ID (Blue): 998830a5-cab7-4bab-ae9c-7c4695f7fb40
+-- Transaction Sign-Up Idempotency Key (Blue): 76246b6f-a329-40f9-bcc5-44079a329a17
 -- Transaction Sign-Up Bonus ID (Soap): 7ff51a18-3664-4ff4-80c9-c40838aeac55
+-- Transaction Sign-Up Idempotency Key (Soap): dcfe0f95-2f7c-48ea-8abe-abf5f93dbc46
 
 -- Users
 INSERT INTO users (id, username, email) VALUES
@@ -116,7 +118,7 @@ INSERT INTO wallets (id, user_id, asset_type, balance) VALUES
 INSERT INTO transactions (id, user_id, idempotency_key, type, status, metadata) VALUES (
     '998830a5-cab7-4bab-ae9c-7c4695f7fb40',
     '45afb320-10ea-4d3b-b9c4-f3d2511902a1',
-    'idemp-blue-signup-001',
+    '76246b6f-a329-40f9-bcc5-44079a329a17',
     'BONUS',
     'SUCCESS',
     '{"reason": "New User Sign-Up"}'
@@ -148,7 +150,7 @@ UPDATE wallets SET balance = balance + 250 WHERE id = '5704a8f0-9dfe-4145-b7aa-6
 INSERT INTO transactions (id, user_id, idempotency_key, type, status, metadata) VALUES (
     '7ff51a18-3664-4ff4-80c9-c40838aeac55',
     'd77c5d95-54aa-48b8-a5ef-6dd791899234',
-    'idemp-soap-signup-001',
+    'dcfe0f95-2f7c-48ea-8abe-abf5f93dbc46',
     'BONUS',
     'SUCCESS',
     '{"reason": "New User Sign-Up"}'
