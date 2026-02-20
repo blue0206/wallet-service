@@ -7,6 +7,17 @@ import type {
 import { ApiError, ApiResponse } from "../types/api.js";
 import { config } from "../core/config.js";
 
+/**
+ * Error handler middleware.
+ *
+ * This middleware catches any errors that may occur during the request lifecycle,
+ * logs the error, and sends a response to the client with the appropriate status code and payload.
+ *
+ * If the error is an instance of ApiError, the status code and payload are taken from the error.
+ * If the error is not an instance of ApiError, the status code is set to 500 and the payload is set to "Internal Server Error".
+ *
+ * In production mode, errors with status codes >= 500 are sanitized and the payload is set to "Internal Server Error".
+ */
 export const errorHandler: ErrorRequestHandler = (
   err: Error,
   req: Request,
