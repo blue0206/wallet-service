@@ -10,8 +10,8 @@ export const TransactionMetadataSchema = z
     requestId: z.string(),
     initialUserBalance: z.coerce.bigint(),
     description: z.string().optional(),
+    failureReason: z.string().optional(),
   })
-  .partial()
   .nullable();
 export type TransactionMetadata = z.infer<typeof TransactionMetadataSchema>;
 
