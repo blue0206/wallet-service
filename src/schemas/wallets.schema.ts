@@ -22,3 +22,12 @@ export const WalletBalanceSelectSchema = WalletInDBSchema.pick({
   balance: true,
 });
 export type WalletBalanceSelect = z.infer<typeof WalletBalanceSelectSchema>;
+
+export const WalletIdBalanceAssetTypeSelectSchema = WalletInDBSchema.pick({
+  id: true,
+  balance: true,
+  asset_type: true,
+});
+export type WalletIdBalanceAssetTypeSelect = z.infer<
+  typeof WalletIdBalanceAssetTypeSelectSchema
+>;
