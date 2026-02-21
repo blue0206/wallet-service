@@ -13,7 +13,10 @@ import {
 } from "../schemas/wallets.schema.js";
 import type { Logger } from "pino";
 import type { QueryResult } from "pg";
-import type { TransactionIdSelect } from "../schemas/transactions.schema.js";
+import type {
+  TransactionIdSelect,
+  TransactionMetadata,
+} from "../schemas/transactions.schema.js";
 import type {
   WalletBalanceSelect,
   WalletIdBalanceSelect,
@@ -24,7 +27,9 @@ class TransactionService {
     logger: Logger,
     params: TransactionServiceParams,
   ): Promise<TransactionServiceResult> {
-    const { userId, amount, currency, type, idempotencyKey, metadata } = params;
+    const { userId, amount, currency, type, idempotencyKey } = params;
+    let metadata = params.metadata as TransactionMetadata;
+
     const log = logger.child({
       endpoint: "POST /transactions",
       userId,
@@ -134,6 +139,8 @@ class TransactionService {
         },
         "Wallets locked",
       );
+      // Update initial user balance in metadata.
+      metadata.initialUserBalance = userWallet.balance;
 
       // Check if user has sufficient funds  to make the transaction.
       if (direction == "OUTGOING" && (userWallet.balance as bigint) < amount) {
@@ -151,6 +158,8 @@ class TransactionService {
 
       if (failureReason) {
         log.warn({ failureStatus, failureReason }, "Transaction rejected");
+        // Add failure reason to metadata.
+        metadata.failureReason = failureReason;
       }
 
       const txQuery: QueryResult = await client.query(
@@ -161,7 +170,7 @@ class TransactionService {
           idempotencyKey,
           type,
           failureReason ? "FAILED" : "SUCCESS",
-          JSON.stringify({ ...(metadata ?? {}), failureReason }),
+          JSON.stringify(metadata),
         ],
       );
 
@@ -255,8 +264,8 @@ class TransactionService {
       return {
         transactionId,
         currency,
-        initialBalance: (userWallet.balance as bigint).toString(),
-        updatedBalance: (updatedUserWallet.balance as bigint).toString(),
+        initialBalance: userWallet.balance.toString(),
+        updatedBalance: updatedUserWallet.balance.toString(),
         status: "SUCCESS",
         alreadyProcessed: false,
       };
