@@ -1,4 +1,5 @@
 import z from "zod";
+import { WalletInDBSchema } from "./wallets.schema.js";
 
 // Users Table row in DB.
 export const UserInDBSchema = z.object({
@@ -13,6 +14,29 @@ export const UserIdSelectSchema = UserInDBSchema.pick({
   id: true,
 });
 export type UserIdSelect = z.infer<typeof UserIdSelectSchema>;
+
+// Schema for query result output of retrieving a select user's balance.
+export const UserBalanceResultSchema = UserInDBSchema.pick({
+  username: true,
+}).extend({
+  balances: z.object({
+    codPoints: WalletInDBSchema.shape.balance,
+    credits: WalletInDBSchema.shape.balance,
+  }),
+});
+export type UserBalanceResult = z.infer<typeof UserBalanceResultSchema>;
+
+// Schema for query result output of retrieving all entries
+// of a specific asset type of all users.
+export const BalanceListResultSchema = z.array(
+  UserInDBSchema.pick({
+    username: true,
+  }).extend({
+    balance: WalletInDBSchema.shape.balance,
+    walletId: WalletInDBSchema.shape.id,
+  }),
+);
+export type BalanceListResult = z.infer<typeof BalanceListResultSchema>;
 
 // Request Body schema for registering new user.
 export const RegisterUserRequestBodySchema = z.object({
