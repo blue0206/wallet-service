@@ -15,8 +15,8 @@ export const TransactionMetadataSchema = z
   .nullable();
 export type TransactionMetadata = z.infer<typeof TransactionMetadataSchema>;
 
-// This represents the Transactions Table row in DB.
-const _TransactionInDBSchema = z.object({
+// Transactions Table row in DB.
+export const TransactionInDBSchema = z.object({
   id: z.uuidv4(),
   user_id: z.uuidv4(),
   idempotency_key: z.uuidv4(),
@@ -25,31 +25,9 @@ const _TransactionInDBSchema = z.object({
   metadata: TransactionMetadataSchema,
   created_at: z.coerce.date(),
 });
-
-// This schema is for use throughout the application.
-export const TransactionInDBSchema = _TransactionInDBSchema.transform(
-  (data) => ({
-    id: data.id,
-    userId: data.user_id,
-    idempotencyKey: data.idempotency_key,
-    type: data.type,
-    status: data.status,
-    metadata: data.metadata,
-    createdAt: data.created_at,
-  }),
-);
 export type TransactionInDB = z.infer<typeof TransactionInDBSchema>;
 
-// This schema is for validating SELECT statement results.
-export const TransactionInDBSelectSchema = _TransactionInDBSchema
-  .partial()
-  .transform((data) => ({
-    id: data.id,
-    userId: data.user_id,
-    idempotencyKey: data.idempotency_key,
-    type: data.type,
-    status: data.status,
-    metadata: data.metadata,
-    createdAt: data.created_at,
-  }));
-export type TransactionInDBSelect = z.infer<typeof TransactionInDBSelectSchema>;
+export const TransactionIdSelectSchema = TransactionInDBSchema.pick({
+  id: true,
+});
+export type TransactionIdSelect = z.infer<typeof TransactionIdSelectSchema>;
