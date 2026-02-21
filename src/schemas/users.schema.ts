@@ -9,6 +9,11 @@ export const UserInDBSchema = z.object({
 });
 export type UserInDB = z.infer<typeof UserInDBSchema>;
 
+export const UserIdSelectSchema = UserInDBSchema.pick({
+  id: true,
+});
+export type UserIdSelect = z.infer<typeof UserIdSelectSchema>;
+
 // Request Body schema for registering new user.
 export const RegisterUserRequestBodySchema = z.object({
   username: z
