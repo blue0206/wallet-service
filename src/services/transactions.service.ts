@@ -12,7 +12,7 @@ import {
   WalletIdBalanceSelectSchema,
 } from "../schemas/wallets.schema.js";
 import type { Logger } from "pino";
-import type { QueryResult } from "pg";
+import type { PoolClient, QueryResult } from "pg";
 import type {
   TransactionIdSelect,
   TransactionMetadata,
@@ -26,6 +26,7 @@ class TransactionService {
   async executeTransaction(
     logger: Logger,
     params: TransactionServiceParams,
+    existingClient?: PoolClient,
   ): Promise<TransactionServiceResult> {
     const { userId, amount, currency, type, idempotencyKey } = params;
     let metadata = params.metadata as TransactionMetadata;
@@ -38,7 +39,8 @@ class TransactionService {
       idempotencyKey,
     });
 
-    const client = await getClient();
+    const client = existingClient ? existingClient : await getClient();
+    const isExistingClient = existingClient ? true : false;
 
     // App transaction failure tracking variables. They will be used
     // when we need to update Transactions table with FAILED status and COMMIT the changes.
@@ -49,9 +51,11 @@ class TransactionService {
     try {
       log.info({ amount: amount.toString() }, "executeTransaction start");
 
-      // Transaction BEGIN
-      await client.query("BEGIN");
-      log.debug("Database transaction BEGIN");
+      if (!isExistingClient) {
+        // Transaction BEGIN
+        await client.query("BEGIN");
+        log.debug("Database transaction BEGIN");
+      }
 
       // Idempotency Check.
       const existingTxQuery: QueryResult = await client.query(
@@ -77,8 +81,10 @@ class TransactionService {
           WalletBalanceSelectSchema,
         );
 
-        await client.query("ROLLBACK");
-        log.debug("Database transaction rollback (idempotency)");
+        if (!isExistingClient) {
+          await client.query("ROLLBACK");
+          log.debug("Database transaction rollback (idempotency)");
+        }
         return {
           transactionId: existingTx.id,
           currency,
@@ -190,11 +196,13 @@ class TransactionService {
       // If failed transaction, COMMIT changes for persistence
       // and throw error. This ensures we have data about failed transactions.
       if (failureReason) {
-        await client.query("COMMIT");
-        log.info(
-          { transactionId },
-          "Database transaction COMMIT (failed transaction stored)",
-        );
+        if (!isExistingClient) {
+          await client.query("COMMIT");
+          log.info(
+            { transactionId },
+            "Database transaction COMMIT (failed transaction stored)",
+          );
+        }
         throw new ApiError(failureStatus, failureReason);
       }
 
@@ -251,15 +259,17 @@ class TransactionService {
       );
 
       // COMMIT transaction.
-      await client.query("COMMIT");
-      log.info(
-        {
-          transactionId,
-          initialBalance: (userWallet.balance as bigint).toString(),
-          updatedBalance: (updatedUserWallet.balance as bigint).toString(),
-        },
-        "Database transaction COMMIT",
-      );
+      if (!isExistingClient) {
+        await client.query("COMMIT");
+        log.info(
+          {
+            transactionId,
+            initialBalance: (userWallet.balance as bigint).toString(),
+            updatedBalance: (updatedUserWallet.balance as bigint).toString(),
+          },
+          "Database transaction COMMIT",
+        );
+      }
 
       return {
         transactionId,
@@ -271,7 +281,7 @@ class TransactionService {
       };
     } catch (err: unknown) {
       // Rollback the transaction if not committed.
-      if (!failureReason) {
+      if (!failureReason && !isExistingClient) {
         try {
           await client.query("ROLLBACK");
           log.debug("Database transaction ROLLBACK");
@@ -288,8 +298,10 @@ class TransactionService {
       log.error({ err }, "executeTransaction failed with unknown error");
       throw new ApiError(500, "Internal Server Error", err);
     } finally {
-      client.release();
-      log.debug("Database pool client released");
+      if (!isExistingClient) {
+        client.release();
+        log.debug("Database pool client released");
+      }
     }
   }
 }
