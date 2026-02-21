@@ -1,5 +1,9 @@
 import z from "zod";
-import { TransactionStatusEnum, TransactionTypeEnum } from "./enums.js";
+import {
+  AssetTypeEnum,
+  TransactionStatusEnum,
+  TransactionTypeEnum,
+} from "./enums.js";
 
 // Transaction metadata in DB.
 export const TransactionMetadataSchema = z
@@ -31,3 +35,25 @@ export const TransactionIdSelectSchema = TransactionInDBSchema.pick({
   id: true,
 });
 export type TransactionIdSelect = z.infer<typeof TransactionIdSelectSchema>;
+
+// Request Body
+export const TransactionRequestBodySchema = z.object({
+  userId: z.uuidv4({ error: "Invalid User ID" }),
+  transactionType: TransactionTypeEnum,
+  assetType: AssetTypeEnum,
+  amount: z.coerce
+    .bigint()
+    .positive({ error: "Amount must be a positive integer." }),
+  description: z.string().optional(),
+});
+export type TransactionRequestBody = z.infer<
+  typeof TransactionRequestBodySchema
+>;
+
+// Request Header
+export const TransactionRequestHeadersSchema = z.looseObject({
+  "idempotency-key": z.uuidv4({ error: "Idempotency Key must be valid UUID." }),
+});
+export type TransactionRequestHeaders = z.infer<
+  typeof TransactionRequestHeadersSchema
+>;
