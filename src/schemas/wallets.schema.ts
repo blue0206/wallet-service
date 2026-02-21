@@ -12,17 +12,20 @@ export const WalletInDBSchema = z.object({
 });
 export type WalletInDB = z.infer<typeof WalletInDBSchema>;
 
+// ID, Balance
 export const WalletIdBalanceSelectSchema = WalletInDBSchema.pick({
   id: true,
   balance: true,
 });
 export type WalletIdBalanceSelect = z.infer<typeof WalletIdBalanceSelectSchema>;
 
+// Balance
 export const WalletBalanceSelectSchema = WalletInDBSchema.pick({
   balance: true,
 });
 export type WalletBalanceSelect = z.infer<typeof WalletBalanceSelectSchema>;
 
+// ID, Balance, Asset Type
 export const WalletIdBalanceAssetTypeSelectSchema = WalletInDBSchema.pick({
   id: true,
   balance: true,
@@ -30,4 +33,14 @@ export const WalletIdBalanceAssetTypeSelectSchema = WalletInDBSchema.pick({
 });
 export type WalletIdBalanceAssetTypeSelect = z.infer<
   typeof WalletIdBalanceAssetTypeSelectSchema
+>;
+
+// ID, User ID, Balance
+export const WalletIdUserIdBalanceSelectSchema = WalletInDBSchema.pick({
+  id: true,
+  user_id: true,
+  balance: true,
+});
+export type WalletIdUserIdBalanceSelect = z.infer<
+  typeof WalletIdUserIdBalanceSelectSchema
 >;
