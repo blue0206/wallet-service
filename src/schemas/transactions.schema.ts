@@ -6,17 +6,15 @@ import {
 } from "./enums.js";
 
 // Transaction metadata in DB.
-export const TransactionMetadataSchema = z
-  .object({
-    ip: z.string(),
-    userAgent: z.string(),
-    location: z.string(),
-    requestId: z.string(),
-    initialUserBalance: z.coerce.bigint(),
-    description: z.string().optional(),
-    failureReason: z.string().optional(),
-  })
-  .nullable();
+export const TransactionMetadataSchema = z.object({
+  ip: z.string(),
+  userAgent: z.string(),
+  location: z.string(),
+  requestId: z.string(),
+  initialUserBalance: z.coerce.bigint(),
+  description: z.string().optional(),
+  failureReason: z.string().optional(),
+});
 export type TransactionMetadata = z.infer<typeof TransactionMetadataSchema>;
 
 // Transactions Table row in DB.
