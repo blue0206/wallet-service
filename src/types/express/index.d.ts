@@ -6,7 +6,7 @@ declare global {
     interface Request {
       log: Logger;
       requestId: string;
-      clientDetails?: ClientDetailsType;
+      clientDetails: ClientDetailsType;
     }
   }
 }
