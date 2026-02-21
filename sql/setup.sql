@@ -121,7 +121,7 @@ INSERT INTO transactions (id, user_id, idempotency_key, type, status, metadata) 
     '76246b6f-a329-40f9-bcc5-44079a329a17',
     'BONUS',
     'SUCCESS',
-    '{"reason": "New User Sign-Up"}'
+    '{"description": "New User Sign-Up"}'
 );
 
 -- Double Entry in Ledger (Debit the treasury and credit Blue)
@@ -153,7 +153,7 @@ INSERT INTO transactions (id, user_id, idempotency_key, type, status, metadata) 
     'dcfe0f95-2f7c-48ea-8abe-abf5f93dbc46',
     'BONUS',
     'SUCCESS',
-    '{"reason": "New User Sign-Up"}'
+    '{"description": "New User Sign-Up"}'
 );
 
 -- Double Entry in Ledger (Debit the treasury and credit Soap)
