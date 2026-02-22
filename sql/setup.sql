@@ -123,7 +123,7 @@ INSERT INTO transactions (id, user_id, idempotency_key, type, status, metadata) 
     '76246b6f-a329-40f9-bcc5-44079a329a17',
     'BONUS',
     'SUCCESS',
-    '{"description": "New User Sign-Up"}'
+    '{"ip": "127.0.0.1", "userAgent": "System/Seed", "location": "System", "requestId": "seed-init-001", "initialUserBalance": "0", "description": "New User Sign-Up"}'
 );
 
 -- Double Entry in Ledger (Debit the treasury and credit Blue)
@@ -155,7 +155,7 @@ INSERT INTO transactions (id, user_id, idempotency_key, type, status, metadata) 
     'dcfe0f95-2f7c-48ea-8abe-abf5f93dbc46',
     'BONUS',
     'SUCCESS',
-    '{"description": "New User Sign-Up"}'
+    '{"ip": "127.0.0.1", "userAgent": "System/Seed", "location": "System", "requestId": "seed-init-002", "initialUserBalance": "0", "description": "New User Sign-Up"}'
 );
 
 -- Double Entry in Ledger (Debit the treasury and credit Soap)
