@@ -1,4 +1,5 @@
 import type { ClientDetailsType } from "../middlewares/assignClientDetails.js";
+import type { GetUserHistory } from "../schemas/transactions.schema.js";
 
 export interface RegisterUserServiceParams {
   username: string;
@@ -12,4 +13,29 @@ export interface RegisterUserServiceResult {
   creditBalance: string;
   cpBalance: string;
   username: string;
+}
+
+export interface GetBalanceResult extends Omit<
+  RegisterUserServiceResult,
+  "userId"
+> {}
+
+export interface GetAllBalancesResult {
+  data: {
+    username: string;
+    balance: string;
+    walletId: string;
+  }[];
+  nextCursor: {
+    lastBalance: string;
+    lastWalletId: string;
+  } | null;
+}
+
+export interface GetUserHistoryResult {
+  data: GetUserHistory;
+  nextCursor: {
+    lastTimestamp: Date;
+    lastTransactionId: string;
+  } | null;
 }
