@@ -166,12 +166,12 @@ class UserService {
       log.debug("getBalanceForUserId start");
       const userBalanceQuery = await query(
         `SELECT
-            user.username,
+            u.username,
             json_object_agg(wallet.asset_type, wallet.balance::text) AS balances
-            FROM users user 
-            LEFT JOIN wallets wallet ON user.id = wallet.user_id
-            WHERE user.id = $1
-            GROUP BY user.id`,
+            FROM users u 
+            LEFT JOIN wallets wallet ON u.id = wallet.user_id
+            WHERE u.id = $1
+            GROUP BY u.id`,
         [userId],
       );
       log.debug(
@@ -233,11 +233,11 @@ class UserService {
       log.debug("getAllBalances start");
       const balancesQuery = await query(
         `SELECT
-            user.username,
+            u.username,
             wallet.balance,
             wallet.id AS wallet_id
             FROM wallets wallet
-            JOIN users user ON wallet.user_id = user.id
+            JOIN users u ON wallet.user_id = u.id
             WHERE wallet.asset_type = $1 
                 AND wallet.wallet_type = 'USER'
                 AND ($2::bigint IS NULL OR (wallet.balance, wallet.id) < ($2::bigint, $3::uuid))
