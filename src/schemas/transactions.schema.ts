@@ -14,7 +14,7 @@ export const TransactionMetadataSchema = z.object({
   userAgent: z.string(),
   location: z.string(),
   requestId: z.string(),
-  initialUserBalance: z.coerce.bigint(),
+  initialUserBalance: z.coerce.bigint().transform((amt) => amt.toString()),
   description: z.string().optional(),
   failureReason: z.string().optional(),
 });
@@ -72,7 +72,7 @@ export const GetUserHistorySchema = z.array(
         walletType: entry.wallet_type,
         assetType: entry.asset_type,
         entryType: entry.entry_type,
-        amount: entry.amount,
+        amount: entry.amount.toString(),
         description: entry.description,
       })),
     })),
@@ -86,7 +86,8 @@ export const TransactionRequestBodySchema = z.object({
   assetType: AssetTypeEnum,
   amount: z.coerce
     .bigint()
-    .positive({ error: "Amount must be a positive integer." }),
+    .positive({ error: "Amount must be a positive integer." })
+    .transform((amt) => amt.toString()),
   description: z.string().optional(),
 });
 export type TransactionRequestBody = z.infer<

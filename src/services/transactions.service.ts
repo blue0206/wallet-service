@@ -146,10 +146,10 @@ class TransactionService {
         "Wallets locked",
       );
       // Update initial user balance in metadata.
-      metadata.initialUserBalance = userWallet.balance;
+      metadata.initialUserBalance = userWallet.balance.toString();
 
       // Check if user has sufficient funds  to make the transaction.
-      if (direction == "OUTGOING" && (userWallet.balance as bigint) < amount) {
+      if (direction == "OUTGOING" && userWallet.balance < BigInt(amount)) {
         failureReason = "Insufficient funds.";
         failureStatus = 402;
       }
@@ -208,8 +208,16 @@ class TransactionService {
 
       // Double entry in ledger for Debit and Credit.
       const debitSystem = direction === "INCOMING" ? true : false;
-      const systemAmount = debitSystem ? -amount : amount;
-      const userAmount = debitSystem ? amount : -amount;
+
+      const numericAmtPos = BigInt(amount);
+      const numericAmtNeg = -numericAmtPos;
+      const systemAmount = debitSystem
+        ? numericAmtNeg.toString()
+        : numericAmtPos.toString();
+      const userAmount = debitSystem
+        ? numericAmtPos.toString()
+        : numericAmtNeg.toString();
+
       const debitDescription = `${currency} payout as a result of '${type}'.`;
       const creditDescription = `${currency} received as a result of ${type}.`;
 

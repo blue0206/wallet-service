@@ -56,12 +56,16 @@ export const listBalances = async (
   req: Request<unknown, unknown, unknown, GetAllBalancesRequestQuery>,
   res: Response,
 ): Promise<void> => {
+  // req.query is converted to number as validation middleware
+  // does not coerce params and query.
   const result = await userService.getAllBalances(
     req.log,
     req.query.currency,
-    req.query.limit,
+    typeof req.query.limit === "number"
+      ? req.query.limit
+      : parseInt(req.query.limit),
     req.query.lastWalletId,
-    req.query.lastBalance,
+    req.query.lastBalance?.toString(),
   );
 
   const responseBody: ApiResponse<GetAllBalancesResult> = {
@@ -81,10 +85,14 @@ export const getTransactionHistory = async (
   >,
   res: Response,
 ): Promise<void> => {
+  // req.query is converted to number as validation middleware
+  // does not coerce params and query.
   const result = await userService.getUserHistory(
     req.log,
     req.params.userId,
-    req.query.limit,
+    typeof req.query.limit === "number"
+      ? req.query.limit
+      : parseInt(req.query.limit),
     req.query.lastTimestamp?.toISOString(),
     req.query.lastTransactionId,
   );

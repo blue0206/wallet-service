@@ -3,7 +3,7 @@ import type { TransactionMetadata } from "../schemas/transactions.schema.js";
 
 export interface TransactionServiceParams {
   userId: string;
-  amount: bigint;
+  amount: string;
   currency: "CP" | "CREDITS";
   type: "TOPUP" | "SPEND" | "BONUS" | "REWARD" | "PENALTY";
   idempotencyKey: string;

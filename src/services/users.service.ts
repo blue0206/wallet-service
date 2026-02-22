@@ -99,7 +99,7 @@ class UserService {
         logger,
         {
           userId,
-          amount: 250n,
+          amount: (250).toString(),
           currency: creditsWallet.asset_type,
           idempotencyKey: uuidv4(),
           type: "BONUS",
@@ -108,7 +108,7 @@ class UserService {
             userAgent: clientDetails.userAgent,
             location: clientDetails.location,
             requestId,
-            initialUserBalance: creditsWallet.balance,
+            initialUserBalance: creditsWallet.balance.toString(),
             description: `Sign-up Bonus for user ${username}.`,
           },
         },
@@ -219,14 +219,14 @@ class UserService {
     currency: AssetType,
     limit: number,
     lastWalletId?: string,
-    lastBalance?: bigint,
+    lastBalance?: string,
   ): Promise<GetAllBalancesResult> {
     const log = logger.child({
       endpoint: "GET /users/balance",
       currency,
       limit,
       lastWalletId,
-      lastBalance: lastBalance ? lastBalance.toString() : undefined,
+      lastBalance: lastBalance,
     });
 
     try {
@@ -243,12 +243,7 @@ class UserService {
                 AND ($2::bigint IS NULL OR (wallet.balance, wallet.id) < ($2::bigint, $3::uuid))
             ORDER BY wallet.balance DESC, wallet.id DESC
             LIMIT $4`,
-        [
-          currency,
-          lastBalance ? lastBalance.toString() : null,
-          lastWalletId || null,
-          limit,
-        ],
+        [currency, lastBalance || null, lastWalletId || null, limit],
       );
       log.debug(
         { rowCount: balancesQuery.rowCount },

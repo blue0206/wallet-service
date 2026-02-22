@@ -32,7 +32,7 @@ export const createTransaction = async (
     userAgent: req.clientDetails.userAgent,
     location: req.clientDetails.location,
     requestId: req.requestId,
-    initialUserBalance: 0n, // Will be set in service method.
+    initialUserBalance: BigInt(0).toString(), // Will be set in service method.
     description: req.body.description,
   };
 
