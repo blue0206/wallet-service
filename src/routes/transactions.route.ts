@@ -7,7 +7,7 @@ import { createTransaction } from "../controllers/transactions.controller.js";
 const transactionRouter = Router();
 
 transactionRouter.post(
-  "/transactions",
+  "/",
   assignClientDetails,
   validateRequest({ bodySchema: TransactionRequestBodySchema }),
   createTransaction,
