@@ -4,7 +4,7 @@ services:
     container_name: cod_wallet_app
     restart: always
     environment:
-      NODE_ENV: production
+      NODE_ENV: ${NODE_ENV}
       PORT: 8000
       DB_HOST: db
       DB_USER: ${DB_USER}
