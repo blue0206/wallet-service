@@ -63,10 +63,12 @@ CREATE TABLE ledger (
 
 -- INDEXES
 
-CREATE INDEX idx_wallets_lookup ON wallets(user_id, asset_type);
 CREATE INDEX idx_transactions_actor ON transactions(user_id);
 CREATE INDEX idx_ledger_tx ON ledger(transaction_id);
 CREATE INDEX idx_ledger_wallet ON ledger(wallet_id);
+CREATE INDEX idx_transactions_idempotency ON transactions(idempotency_key);
+CREATE INDEX idx_transactions_cursor ON transactions(user_id, created_at DESC, id DESC);
+CREATE INDEX idx_wallets_list ON wallets(asset_type, wallet_type, balance DESC, id DESC);
 
 -- SEEDING
 
