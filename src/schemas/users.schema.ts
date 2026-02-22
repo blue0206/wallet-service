@@ -19,12 +19,20 @@ export type UserIdSelect = z.infer<typeof UserIdSelectSchema>;
 // Schema for query result output of retrieving a select user's balance.
 export const UserBalanceResultSchema = UserInDBSchema.pick({
   username: true,
-}).extend({
-  balances: z.object({
-    codPoints: WalletInDBSchema.shape.balance,
-    credits: WalletInDBSchema.shape.balance,
-  }),
-});
+})
+  .extend({
+    balances: z.object({
+      CP: WalletInDBSchema.shape.balance,
+      CREDITS: WalletInDBSchema.shape.balance,
+    }),
+  })
+  .transform((data) => ({
+    username: data.username,
+    balances: {
+      codPoints: data.balances.CP,
+      credits: data.balances.CREDITS,
+    },
+  }));
 export type UserBalanceResult = z.infer<typeof UserBalanceResultSchema>;
 
 // Schema for query result output of retrieving all entries
@@ -32,10 +40,16 @@ export type UserBalanceResult = z.infer<typeof UserBalanceResultSchema>;
 export const BalanceListResultSchema = z.array(
   UserInDBSchema.pick({
     username: true,
-  }).extend({
-    balance: WalletInDBSchema.shape.balance,
-    walletId: WalletInDBSchema.shape.id,
-  }),
+  })
+    .extend({
+      balance: WalletInDBSchema.shape.balance,
+      wallet_id: WalletInDBSchema.shape.id,
+    })
+    .transform((data) => ({
+      username: data.username,
+      balance: data.balance,
+      walletId: data.wallet_id,
+    })),
 );
 export type BalanceListResult = z.infer<typeof BalanceListResultSchema>;
 

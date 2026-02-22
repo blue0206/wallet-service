@@ -50,7 +50,7 @@ export const GetUserHistorySchema = z.array(
     .extend({
       transaction_id: TransactionInDBSchema.shape.id,
       transaction_type: TransactionInDBSchema.shape.type,
-      ledgerEntries: z.array(
+      ledger_entries: z.array(
         z.object({
           ledger_id: LedgerInDBSchema.shape.id,
           wallet_type: WalletTypeEnum,
@@ -67,7 +67,7 @@ export const GetUserHistorySchema = z.array(
       status: data.status,
       metadata: data.metadata,
       createdAt: data.created_at,
-      ledgerEntries: data.ledgerEntries.map((entry) => ({
+      ledgerEntries: data.ledger_entries.map((entry) => ({
         ledgerId: entry.ledger_id,
         walletType: entry.wallet_type,
         assetType: entry.asset_type,
