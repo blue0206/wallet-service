@@ -1,5 +1,6 @@
 import z from "zod";
 import { WalletInDBSchema } from "./wallets.schema.js";
+import { AssetTypeEnum } from "./enums.js";
 
 // Users Table row in DB.
 export const UserInDBSchema = z.object({
@@ -48,4 +49,40 @@ export const RegisterUserRequestBodySchema = z.object({
 });
 export type RegisterUserRequestBody = z.infer<
   typeof RegisterUserRequestBodySchema
+>;
+
+// Request Params schema for retrieving user's balance.
+export const GetUserBalanceRequestParamsSchema = z.object({
+  userId: z.uuidv4({ error: "Invalid User ID" }),
+});
+export type GetUserBalanceRequestParams = z.infer<
+  typeof GetUserBalanceRequestParamsSchema
+>;
+
+// Request Query schema for retrieving all users' balance list.
+export const GetAllBalancesRequestQuerySchema = z.object({
+  currency: AssetTypeEnum,
+  limit: z.coerce.number().int().positive().min(1).optional().default(11),
+  lastWalletId: z.uuidv4().optional(),
+  lastBalance: z.coerce.bigint().optional(),
+});
+export type GetAllBalancesRequestQuery = z.infer<
+  typeof GetAllBalancesRequestQuerySchema
+>;
+
+// Request Params schema for retrieving a user's transaction history.
+export const GetUserHistoryRequestParamsSchema =
+  GetUserBalanceRequestParamsSchema;
+export type GetUserHistoryRequestParams = z.infer<
+  typeof GetUserHistoryRequestParamsSchema
+>;
+
+// Request Query schema for retrieving a user's transaction history.
+export const GetUserHistoryRequestQuerySchema = z.object({
+  limit: GetAllBalancesRequestQuerySchema.shape.limit,
+  lastTimestamp: z.coerce.date().optional(),
+  lastTransactionId: z.uuidv4().optional(),
+});
+export type GetUserHistoryRequestQuery = z.infer<
+  typeof GetUserHistoryRequestQuerySchema
 >;
