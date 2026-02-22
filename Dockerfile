@@ -15,7 +15,6 @@ WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/sql ./sql
 COPY --from=builder /usr/src/app/package.json ./package.json
 
 EXPOSE 8000
