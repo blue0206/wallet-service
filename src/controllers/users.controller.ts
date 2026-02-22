@@ -1,8 +1,19 @@
-import type { Request, Response } from "express";
-import { RegisterUserRequestBody } from "../schemas/users.schema.js";
+import {
+  GetAllBalancesRequestQuery,
+  GetUserBalanceRequestParams,
+  GetUserHistoryRequestParams,
+  GetUserHistoryRequestQuery,
+  RegisterUserRequestBody,
+} from "../schemas/users.schema.js";
 import { userService } from "../services/users.service.js";
 import { ApiResponse } from "../types/api.js";
-import { RegisterUserServiceResult } from "../types/users.js";
+import type { Request, Response } from "express";
+import type {
+  GetAllBalancesResult,
+  GetBalanceResult,
+  GetUserHistoryResult,
+  RegisterUserServiceResult,
+} from "../types/users.js";
 
 export const registerUser = async (
   req: Request<unknown, unknown, RegisterUserRequestBody>,
@@ -22,4 +33,66 @@ export const registerUser = async (
   };
 
   res.status(201).json(responseBody);
+};
+
+export const getUserBalance = async (
+  req: Request<GetUserBalanceRequestParams>,
+  res: Response,
+): Promise<void> => {
+  const result = await userService.getBalanceForUserId(
+    req.log,
+    req.params.userId,
+  );
+
+  const responseBody: ApiResponse<GetBalanceResult> = {
+    success: true,
+    statusCode: 200,
+    payload: result,
+  };
+  res.status(200).json(responseBody);
+};
+
+export const listBalances = async (
+  req: Request<unknown, unknown, unknown, GetAllBalancesRequestQuery>,
+  res: Response,
+): Promise<void> => {
+  const result = await userService.getAllBalances(
+    req.log,
+    req.query.currency,
+    req.query.limit,
+    req.query.lastWalletId,
+    req.query.lastBalance,
+  );
+
+  const responseBody: ApiResponse<GetAllBalancesResult> = {
+    success: true,
+    statusCode: 200,
+    payload: result,
+  };
+  res.status(200).json(responseBody);
+};
+
+export const getTransactionHistory = async (
+  req: Request<
+    GetUserHistoryRequestParams,
+    unknown,
+    unknown,
+    GetUserHistoryRequestQuery
+  >,
+  res: Response,
+): Promise<void> => {
+  const result = await userService.getUserHistory(
+    req.log,
+    req.params.userId,
+    req.query.limit,
+    req.query.lastTimestamp?.toISOString(),
+    req.query.lastTransactionId,
+  );
+
+  const responseBody: ApiResponse<GetUserHistoryResult> = {
+    success: true,
+    statusCode: 200,
+    payload: result,
+  };
+  res.status(200).json(responseBody);
 };
