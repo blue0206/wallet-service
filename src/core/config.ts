@@ -14,6 +14,7 @@ const EnvironmentSchema = z.object({
   DB_USER: z.string().min(1, { message: "DB_USER is missing." }),
   DB_NAME: z.string().min(1, { message: "DB_NAME is missing." }),
   DB_PORT: z.coerce.number().int().positive().default(5432),
+  MAX_POOL_SIZE: z.coerce.number().int().positive().default(20),
   // pino logger
   LOG_LEVEL: z
     .enum(["debug", "info", "warn", "error", "fatal"])

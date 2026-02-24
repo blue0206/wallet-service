@@ -11,7 +11,7 @@ export const pool = new Pool({
   host: config.DB_HOST,
   database: config.DB_NAME,
   port: config.DB_PORT,
-  max: 20,
+  max: config.MAX_POOL_SIZE,
   idleTimeoutMillis: 32000,
   connectionTimeoutMillis: 2000,
 });
