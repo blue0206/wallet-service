@@ -30,6 +30,7 @@ A high-concurrency, closed-loop internal wallet microservice. Engineered with a 
     - [Phase 2: Post-Optimization (Eventual Consistency \& Background Worker)](#phase-2-post-optimization-eventual-consistency--background-worker)
       - [Post-Optimization Bulk Seed Test](#post-optimization-bulk-seed-test)
       - [Post-Optimization Load Test](#post-optimization-load-test)
+    - [Running the Benchmarks](#running-the-benchmarks)
 
 ## Live Demo
 
@@ -194,10 +195,10 @@ Here's a list of upcoming changes:
 > [!WARNING]
 > Do NOT run these load-testing scripts against the live Render URL. The free-tier server will crash. These scripts are designed for local stress testing against the Dockerized PostgreSQL instance.
 
-I wrote two custom Node.js Promise-pool scripts:
+I wrote two custom scripts:
 
-1. **`bulkSeed.js`**: Registers 25,000 users (each registration triggers a Bonus Transaction).
-2. **`loadTest.js`**: Fires 50,000 transactions across random users.
+1. **[bulkSeed.js](./bulkSeed.js)**: Registers 25,000 users (each registration triggers a Bonus Transaction).
+2. **[loadTest.js](./loadTest.js)**: Fires 50,000 transactions across random users.
 
 **Test Environment:** MacBook Air (M2, 8GB RAM) | DB Pool Size: `95` | Concurrency: `1008`
 
@@ -241,3 +242,21 @@ _Architecture: Locked ONLY the `USER` wallet. `SYSTEM` wallet updated asynchrono
 #### Post-Optimization Load Test
 
 ![Post-Optimization Load Test](./data/post-optimization-load-test.png)
+
+### Running the Benchmarks
+
+To run the full stress-test yourself, ensure the app is running (see [Quick Start (Docker)](#quick-start-docker)) and execute the following command:
+
+```bash
+npm run test:benchmark
+```
+
+**What this does:**
+
+1. Executes [bulkSeed.js](./bulkSeed.js) script to register 25,000 users (and generates `users.json`).
+2. Then executes the [loadTest.js](./loadTest.js) script to run 50,000 concurrent transactions against those users.
+
+**Configuration Notes:**
+
+- You can tweak the database connection pool size by changing `MAX_POOL_SIZE` in the `.env` file.
+- _Note:_ PostgreSQL default `max_connections` is 100 (with ~3 reserved for superusers).

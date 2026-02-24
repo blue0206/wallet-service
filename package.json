@@ -19,7 +19,8 @@
     "dev": "node dist/index.js",
     "dev:watch": "nodemon dist/index.js",
     "start": "npm run build && npm run dev",
-    "db:seed": "npm run build && node dist/core/db/seed.js"
+    "db:seed": "npm run build && node dist/core/db/seed.js",
+    "test:benchmark": "node bulkSeed.js && node loadTest.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
