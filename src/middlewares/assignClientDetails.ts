@@ -1,5 +1,6 @@
 import { getClientIp } from "get-client-ip";
 import { UAParser } from "ua-parser-js";
+import { LoadTestRequestHeadersSchema } from "../schemas/transactions.schema.js";
 import type { Request, Response, NextFunction } from "express";
 import type { Logger } from "pino";
 
@@ -21,12 +22,24 @@ export default async function assignClientDetails(
   _res: Response,
   next: NextFunction,
 ): Promise<void> {
+  // Check if the request is for load test.
+  const validatedHeaders = LoadTestRequestHeadersSchema.safeParse(req.headers);
+
   let clientIp = getClientIp(req);
   if (!clientIp) {
     clientIp = "Unknown";
   }
   const userAgent = getUserAgent(req.headers["user-agent"]);
-  const location = await getLocation(clientIp, req.log);
+
+  // If request is for load test, then we skip api call for ip-api
+  // and pass in a dummy value for location.
+  let location = "";
+  if (validatedHeaders.success) {
+    req.log.info("Load Test Request encountered, passing mock location...");
+    location = "Unknown Location";
+  } else {
+    location = await getLocation(clientIp, req.log);
+  }
 
   req.clientDetails = {
     ip: clientIp ?? "",

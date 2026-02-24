@@ -94,10 +94,18 @@ export type TransactionRequestBody = z.infer<
   typeof TransactionRequestBodySchema
 >;
 
-// Request Header
+// Request Header for Idempotency Key
 export const TransactionRequestHeadersSchema = z.looseObject({
   "idempotency-key": z.uuidv4({ error: "Idempotency Key must be valid UUID." }),
 });
 export type TransactionRequestHeaders = z.infer<
   typeof TransactionRequestHeadersSchema
+>;
+
+// Request Header for load testing.
+export const LoadTestRequestHeadersSchema = z.looseObject({
+  "x-load-test": z.coerce.boolean(),
+});
+export type LoadTestRequestHeaders = z.infer<
+  typeof LoadTestRequestHeadersSchema
 >;
