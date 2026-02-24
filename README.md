@@ -16,13 +16,20 @@ A high-concurrency, closed-loop internal wallet microservice. Engineered with a 
     - [5. Observability](#5-observability)
   - [Choice of Technology](#choice-of-technology)
   - [Bottlenecks](#bottlenecks)
-    - [1. The I/O Bottleneck: External API Calls](#1-the-io-bottleneck-external-api-calls)
-    - [2. The Database Bottleneck: System Wallet Hot-Row Contention](#2-the-database-bottleneck-system-wallet-hot-row-contention)
+    - [1. The I/O Bottleneck: External API Calls (Pending)](#1-the-io-bottleneck-external-api-calls-pending)
+    - [2. The Database Bottleneck: System Wallet Hot-Row Contention (Resolved ✅)](#2-the-database-bottleneck-system-wallet-hot-row-contention-resolved-)
   - [API Reference](#api-reference)
     - [1. Transactions](#1-transactions)
     - [2. User Management](#2-user-management)
     - [3. Analytics \& History (Cursor Pagination)](#3-analytics--history-cursor-pagination)
   - [Upcoming Changes (WIP, Post-Submission)](#upcoming-changes-wip-post-submission)
+  - [Benchmarks](#benchmarks)
+    - [Phase 1: Pre-Optimization (Strict Locking)](#phase-1-pre-optimization-strict-locking)
+      - [Pre-Optimization Bulk Seed Test](#pre-optimization-bulk-seed-test)
+      - [Pre-Optimization Load Test](#pre-optimization-load-test)
+    - [Phase 2: Post-Optimization (Eventual Consistency \& Background Worker)](#phase-2-post-optimization-eventual-consistency--background-worker)
+      - [Post-Optimization Bulk Seed Test](#post-optimization-bulk-seed-test)
+      - [Post-Optimization Load Test](#post-optimization-load-test)
 
 ## Live Demo
 
@@ -101,14 +108,15 @@ I have implemented a **Cursor-based Pagination** using Tuple Comparisons `(creat
 
 While this architecture is robust, there are two distinct bottlenecks that would need addressing for production at scale:
 
-### 1. The I/O Bottleneck: External API Calls
+### 1. The I/O Bottleneck: External API Calls (Pending)
 
 Currently, the `/users` and `/transactions` routes rely on an external call to `ip-api.com` to fetch geolocation metadata.
 
 - This is the BIGGEST bottleneck. Making an external HTTP request takes 50-500ms, and this is a bottleneck for every request.
+-
 - A possible fix would be to replace the network call with a self-hosted, in-memory IP database.
 
-### 2. The Database Bottleneck: System Wallet Hot-Row Contention
+### 2. The Database Bottleneck: System Wallet Hot-Row Contention (Resolved ✅)
 
 - Currently we are locking BOTH system wallet and user wallet. This works at smaller scale. However, at a scale of tens of thousands of users, this is a bottleneck.
 
@@ -176,7 +184,60 @@ Retrieves the full transaction history with audit trails.
 I really loved working on this project, a huge thanks to the Dino Ventures team!
 Here's a list of upcoming changes:
 
-- Postman collection for the API.
-- I will stress test this app with autocannon and share the script + results.
-- Implement lazy update optimization as mentioned in previous section.
-- Vibe code a frontend for better UX.
+- [x] I will stress test this app and share the script + results.
+- [x] Implement lazy update optimization as mentioned in previous section.
+- [ ] Postman collection for the API.
+- [ ] Vibe code a frontend for better UX.
+
+## Benchmarks
+
+> [!WARNING]
+> Do NOT run these load-testing scripts against the live Render URL. The free-tier server will crash. These scripts are designed for local stress testing against the Dockerized PostgreSQL instance.
+
+I wrote two custom Node.js Promise-pool scripts:
+
+1. **`bulkSeed.js`**: Registers 25,000 users (each registration triggers a Bonus Transaction).
+2. **`loadTest.js`**: Fires 50,000 transactions across random users.
+
+**Test Environment:** MacBook Air (M2, 8GB RAM) | DB Pool Size: `95` | Concurrency: `1008`
+
+### Phase 1: Pre-Optimization (Strict Locking)
+
+_Architecture: Locked both `SYSTEM` and `USER` wallets in real-time._
+
+| Test          | Total Requests | Time Taken | Throughput     | 200 (Success) | 5xx (Server Crashes) |
+| :------------ | :------------- | :--------- | :------------- | :------------ | :------------------- |
+| **Bulk Seed** | 25,000         | 52.45s     | 476.60 req/sec | 23,680        | **1,320**            |
+| **Load Test** | 50,000         | 65.17s     | 767.27 req/sec | 47,158        | **259**              |
+
+**Insight:** The system crashed repeatedly under load. Because 1,008 concurrent requests were fighting over the 95 available database connections to lock the **exact same System row**, the DB connection pool exhausted itself. Requests sat in the Node queue until they timed out, throwing 500 errors.
+
+#### Pre-Optimization Bulk Seed Test
+
+![Pre-Optimization Bulk Seed](./data/pre-optimization-bulk-seed.png)
+
+#### Pre-Optimization Load Test
+
+![Pre-Optimization Load Test](./data/pre-optimization-load-test.png)
+
+### Phase 2: Post-Optimization (Eventual Consistency & Background Worker)
+
+_Architecture: Locked ONLY the `USER` wallet. `SYSTEM` wallet updated asynchronously via [background worker](./src/core/scheduler.ts)._
+
+| Test          | Total Requests | Time Taken | Throughput          | 200 (Success) | 5xx (Server Crashes) |
+| :------------ | :------------- | :--------- | :------------------ | :------------ | :------------------- |
+| **Bulk Seed** | 25,000         | 25.21s     | **991.51 req/sec**  | 25,000        | **0**                |
+| **Load Test** | 50,000         | 41.66s     | **1245.98 req/sec** | 45,943\*      | **0**                |
+
+> \*_Note: The remaining 4,057 requests correctly returned `402 Insufficient Funds` as users ran out of starting credits. Zero double-spends occurred._
+
+**Insight:** By removing the System lock, database connections were freed up instantly. The 95 active DB connections were able to lock 95 _different_ User wallets simultaneously.
+**Throughput increased by over 56%, and server crashes dropped to 0.** The architecture is now strictly ACID at the user level, and Eventually Consistent at the system level.
+
+#### Post-Optimization Bulk Seed Test
+
+![Post-Optimization Bulk Seed Test](./data/post-optimization-bulk-seed.png)
+
+#### Post-Optimization Load Test
+
+![Post-Optimization Load Test](./data/post-optimization-load-test.png)
