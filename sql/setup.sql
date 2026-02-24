@@ -58,6 +58,7 @@ CREATE TABLE ledger (
     type ledger_type_enum NOT NULL,
     amount BIGINT NOT NULL,
     description VARCHAR(255),
+    system_synced BOOLEAN NOT NULL DEFAULT TRUE, -- Indicates system wallet balance corresponding to this ledger entry has been updated. Used for lazy balance update approach to decouple ledger entry creation and system wallet balance update.
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -69,6 +70,7 @@ CREATE INDEX idx_ledger_wallet ON ledger(wallet_id);
 CREATE INDEX idx_transactions_idempotency ON transactions(idempotency_key);
 CREATE INDEX idx_transactions_cursor ON transactions(user_id, created_at DESC, id DESC);
 CREATE INDEX idx_wallets_list ON wallets(asset_type, wallet_type, balance DESC, id DESC);
+CREATE INDEX idx_ledger_unsynced ON ledger(wallet_id) WHERE system_synced = false;
 
 -- SEEDING
 
