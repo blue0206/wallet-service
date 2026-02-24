@@ -96,7 +96,7 @@ class TransactionService {
       }
 
       // FLOW:
-      // 1. Lock wallets (system first, user second).
+      // 1. Lock wallet (user).
       // 2. Create transaction. REQ: (userId, idemp key, type, status, metadata) RETURN: (txId)
       // 3. Double entry in ledger. REQ: (txId, walletId, type, amount, description)
       // 4. Updating wallet balance. REQ: (walletId, amount)
@@ -104,11 +104,11 @@ class TransactionService {
       const { direction, systemWalletType } = TRANSACTION_RULES[type];
       log.debug({ direction, systemWalletType }, "Locking wallets");
 
-      // Consistent locking, system wallet first, user wallet second.
       const systemWalletResult: QueryResult = await client.query(
-        "SELECT id, balance FROM wallets WHERE wallet_type = $1 AND asset_type = $2 FOR UPDATE",
+        "SELECT id, balance FROM wallets WHERE wallet_type = $1 AND asset_type = $2",
         [systemWalletType, currency],
       );
+      // Lock user wallet.
       const userWalletResult: QueryResult = await client.query(
         "SELECT id, balance FROM wallets WHERE user_id = $1 AND asset_type = $2 FOR UPDATE",
         [userId, currency],
@@ -222,9 +222,9 @@ class TransactionService {
       const creditDescription = `${currency} received as a result of ${type}.`;
 
       await client.query(
-        `INSERT INTO ledger (transaction_id, wallet_id, type, amount, description) VALUES
-         ($1, $2, $3, $4, $5),
-         ($1, $6, $7, $8, $9)`,
+        `INSERT INTO ledger (transaction_id, wallet_id, type, amount, description, system_synced) VALUES
+         ($1, $2, $3, $4, $5, false),
+         ($1, $6, $7, $8, $9, true)`,
         [
           transactionId,
           systemWallet.id,
@@ -247,13 +247,6 @@ class TransactionService {
         },
         "Ledger entries inserted",
       );
-
-      // Update system wallet final balance.
-      await client.query(
-        "UPDATE wallets SET balance = balance + $1 WHERE id = $2",
-        [systemAmount, systemWallet.id],
-      );
-      log.debug({ systemWalletId: systemWallet.id }, "System wallet updated");
 
       // Update user wallet with final balance and get updated balance to return in response.
       const updateUserWalletQuery = await client.query(

@@ -13,6 +13,7 @@ import userRouter from "./routes/users.route.js";
 import transactionRouter from "./routes/transactions.route.js";
 import type { Request, Response } from "express";
 import type { Server } from "http";
+import { systemWalletSyncWorker } from "./core/scheduler.js";
 
 const app = express();
 // Assign request id and child logger via middleware.
@@ -73,6 +74,10 @@ const server: Server = app.listen(PORT, async () => {
     `Server running on port ${config.PORT.toString()} in ${config.NODE_ENV} mode`,
   );
   logger.info("Postgres Connection Pool initialized.");
+
+  // Start the system wallet sync worker.
+  await systemWalletSyncWorker.start();
+  logger.info("System Sync Worker scheduled to run every minute.");
 });
 
 //---------GRACEFUL SHUTDOWN--------
